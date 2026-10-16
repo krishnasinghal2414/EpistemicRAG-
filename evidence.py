@@ -1,4 +1,6 @@
 
+import re
+
 documents = [
     {
         "id": 1,
@@ -13,25 +15,39 @@ documents = [
     {
         "id": 3,
         "source": "Document C",
-        "content": "The library opens at 9 AM."
+        "content": "The library closes at 6 PM."
     }
 ]
 
-for document in documents:
-    print(document["source"])
-    print(document["content"])
+def get_words(text):
+    return re.findall(r"\b[a-z0-9]+\b", text.lower())
+
+def search_documents(query):
+    query_words = set(get_words(query))
+    results = []
+
+    for document in documents:
+        content_words = set(get_words(document["content"]))
+        score = len(query_words & content_words)
+
+        if score > 0:
+            results.append({
+                "document": document,
+                "score": score
+            })
+
+    results.sort(key=lambda item: item["score"], reverse=True)
+    return results
+
+query = input("Ask a question: ")
+results = search_documents(query)
+
+for result in results:
+    print("Source:", result["document"]["source"])
+    print("Content:", result["document"]["content"])
+    print("Score:", result["score"])
     print()
 
-count_9 = 0
-count_10 = 0
-
-for document in documents:
-    if "9 AM" in document["content"]:
-        count_9 += 1
-
-    if "10 AM" in document["content"]:
-        count_10 += 1
-
-print("Evidence for 9 AM:", count_9)
-print("Evidence for 10 AM:", count_10)
+# git add .
+# git commit -m "first"
 # git push origin main
